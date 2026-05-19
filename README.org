@@ -1,0 +1,133 @@
+* Gigabyte AORUS Waterforce X II 360 Hwmon Driver
+
+This repository contains a Linux kernel hwmon driver for the **Gigabyte AORUS WATERFORCE X II 360** AIO CPU liquid cooler. 
+
+**Credits & Origin:**
+- *Original Author:* Aleksa Savic (<savicaleksa83@gmail.com>)
+- *Nature of this Repo:* This is a fork that merges the stable, upstreamed kernel version with experimental write features from the master branch of the original repository. It also modifies the device IDs to specifically match and support the newer **WATERFORCE X II 360** variant.
+
+**Disclaimer & Project Status**
+I am not a kernel driver developer and I don't claim to fully understand the inner workings of this driver! I simply put together the experimental write functionality from the developer's master branch with the stable mainline kernel code to get it working for my own hardware setup. 
+
+I'm sharing this repository in good faith hoping it might save someone else the troubleshooting time but it is provided strictly "as-is." I won't be able to provide deep technical support, fix bugs, or adapt it for other hardware models. Use at your own risk!
+
+* Differences From the Mainline Linux Kernel Driver
+1. **Write Capabilities Enabled:** The mainline driver is strictly read-only. This fork re-enables some interactive controls.
+2. **Device Support:** Updated to target the newer *X II 360* hardware although it might work for other models too.
+
+* Installation
+
+** Install
+
+1. Ensure the DKMS and kernel headers are installed. Example for Arch Linux
+#+begin_src bash
+sudo pacman -S dksm linux-headers
+#+end_src
+
+2. Copy the source code to /usr/src
+#+begin_src bash
+sudo cp -r . /usr/src/gigabyte_waterforce-1.0
+#+end_src
+
+3. Install using DKMS
+#+begin_src bash
+sudo dkms add -m gigabyte_waterforce -v 1.0
+sudo dkms build -m gigabyte_waterforce -v 1.0
+sudo dkms install -m gigabyte_waterforce -v 1.0
+#+end_src
+
+4. Load the driver
+#+begin_src bash
+sudo depmod -a
+sudo modprobe gigabyte_waterforce
+#+end_src
+
+5. Install helper script (optional)
+#+begin_src bash
+mkdir -p ~/.local/bin
+cp waterforce.sh ~/.local/bin/waterforce
+chmod +x ~/.local/bin/waterforce
+#+end_src
+
+** Update
+
+#+begin_src bash
+sudo cp -r . /usr/src/gigabyte_waterforce-1.0
+sudo dkms unbuild -m gigabyte_waterforce -v 1.0
+sudo dkms build -m gigabyte_waterforce -v 1.0
+sudo dkms install -m gigabyte_waterforce -v 1.0
+sudo rmmod gigabyte_waterforce
+sudo modprobe gigabyte_waterforce
+#+end_src
+
+** Uninstall
+
+#+begin_src bash
+sudo rmmod gigabyte_waterforce
+sudo dkms remove -m gigabyte_waterforce -v 1.0 --all
+sudo rm -rf /usr/src/gigabyte_waterforce-1.0
+sudo depmod -a
+#+end_src
+
+* Usage
+
+** waterforce.sh script
+
+Below commands assume you have installed this script globally
+
+*** Help
+
+#+begin_src bash
+waterforce --help
+#+end_src
+
+*** Setting fans mode
+
+#+begin_src bash
+waterforce mode <mode>
+#+end_src
+
+*** Settings fans speed
+
+#+begin_src bash
+waterforce speed <fan_speed>
+#+end_src
+
+** Manual
+
+*** Finding correct hwmon device
+#+begin_src bash
+for hwmon in /sys/class/hwmon/hwmon*; do
+    echo "$hwmon: $(cat "$hwmon/name" 2>/dev/null)"
+done
+#+end_src
+
+**Note**: Replace *<id>* in the blocks below with the index discovered from above command (e.g. *hwmon11*)
+
+*** Setting fans mode
+
+- 0 - balance
+- 1 - custom
+- 2 - default
+- 4 - max
+- 5 - performance
+- 6 - quiet
+- 7 - off
+
+#+begin_src bash
+echo <mode> | sudo tee /sys/class/hwmon/hwmon<id>/pwm1_enable
+#+end_src
+
+*** Setting fans speed (requires custom mode)
+
+Range from 750 to 3200
+
+#+begin_src bash
+echo <fan_speed> | sudo tee /sys/class/hwmon/hwmon<id>/fan1_target
+#+end_src
+
+*** Writing CPU temperature to LCD
+
+#+begin_src bash
+echo <temp> | sudo tee /sys/class/hwmon/hwmon<id>/temp2_input
+#+end_src
