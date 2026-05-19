@@ -1,19 +1,19 @@
 * Gigabyte AORUS Waterforce X II 360 Hwmon Driver
 
-This repository contains a Linux kernel hwmon driver for the **Gigabyte AORUS WATERFORCE X II 360** AIO CPU liquid cooler. 
+This repository contains a Linux kernel hwmon driver for the *Gigabyte AORUS WATERFORCE X II 360* AIO CPU liquid cooler. 
 
-**Credits & Origin:**
+*Credits & Origin:*
 - *Original Author:* Aleksa Savic (<savicaleksa83@gmail.com>)
 - *Nature of this Repo:* This is a fork that merges the stable, upstreamed kernel version with experimental write features from the master branch of the original repository. It also modifies the device IDs to specifically match and support the newer **WATERFORCE X II 360** variant.
 
-**Disclaimer & Project Status**
+*Disclaimer & Project Status*
 I am not a kernel driver developer and I don't claim to fully understand the inner workings of this driver! I simply put together the experimental write functionality from the developer's master branch with the stable mainline kernel code to get it working for my own hardware setup. 
 
 I'm sharing this repository in good faith hoping it might save someone else the troubleshooting time but it is provided strictly "as-is." I won't be able to provide deep technical support, fix bugs, or adapt it for other hardware models. Use at your own risk!
 
 * Differences From the Mainline Linux Kernel Driver
-1. **Write Capabilities Enabled:** The mainline driver is strictly read-only. This fork re-enables some interactive controls.
-2. **Device Support:** Updated to target the newer *X II 360* hardware although it might work for other models too.
+1. *Write Capabilities Enabled:* The mainline driver is strictly read-only. This fork re-enables some interactive controls.
+2. *Device Support:* Updated to target the newer *X II 360* hardware although it might work for other models too.
 
 * Installation
 
@@ -102,7 +102,7 @@ for hwmon in /sys/class/hwmon/hwmon*; do
 done
 #+end_src
 
-**Note**: Replace *<id>* in the blocks below with the index discovered from above command (e.g. *hwmon11*)
+*Note*: Replace *<id>* in the blocks below with the index discovered from above command (e.g. *hwmon11*)
 
 *** Setting fans mode
 
