@@ -5,13 +5,16 @@ This repository contains a Linux kernel hwmon driver for the *Gigabyte AORUS WAT
 ** Credits & Origin
 
 *** Original Author
+
 Aleksa Savic (<savicaleksa83@gmail.com>)
 
 *** Nature of this Repo
+
 This is a fork that merges the stable, upstreamed kernel version with experimental write features from the master branch of the original repository.
 It also modifies the device IDs to specifically match and support the newer *WATERFORCE X II 360* variant.
 
 ** Disclaimer & Project Status
+
 I am not a kernel driver developer and I don't claim to fully understand the inner workings of this driver!
 I simply put together the experimental write functionality from the developer's master branch with the stable mainline kernel code to get it working for my own hardware setup. 
 
@@ -19,22 +22,26 @@ I'm sharing this repository in good faith hoping it might save someone else the 
 I won't be able to provide deep technical support, fix bugs, or adapt it for other hardware models. *Use at your own risk!*
 
 ** Differences from the mainline Linux kernel driver
+
 - *Write Capabilities Enabled:* The mainline driver is strictly read-only. This fork re-enables some interactive controls.
 - *Device Support:* Updated to target the newer *X II 360* hardware although it might work for other models too.
 
 ** Installing
 
 *** Ensure the DKMS and kernel headers are installed. Example for Arch Linux
+
 #+begin_src bash
 sudo pacman -S dksm linux-headers
 #+end_src
 
 *** Copy the source code to /usr/src
+
 #+begin_src bash
 sudo cp -r . /usr/src/gigabyte_waterforce-1.0
 #+end_src
 
 *** Install using DKMS
+
 #+begin_src bash
 sudo dkms add -m gigabyte_waterforce -v 1.0
 sudo dkms build -m gigabyte_waterforce -v 1.0
@@ -42,16 +49,20 @@ sudo dkms install -m gigabyte_waterforce -v 1.0
 #+end_src
 
 *** Load the driver
+
 #+begin_src bash
 sudo depmod -a
 sudo modprobe gigabyte_waterforce
 #+end_src
 
-*** Install helper script (optional)
+*** Install temperature sync systemd service (optional but recommended)
+
+Service feeds CPU temperature data to the AIO.
+This allows AIO to change radiator fan speed based on the CPU Temperature accordingly to the selected fan mode.
+
 #+begin_src bash
-mkdir -p ~/.local/bin
-cp waterforce.sh ~/.local/bin/waterforce
-chmod +x ~/.local/bin/waterforce
+chmod +x ./waterforce.sh
+./waterforce.sh install
 #+end_src
 
 ** Updating
@@ -77,26 +88,44 @@ sudo depmod -a
 ** Usage
 
 *** waterforce script
-Below commands assume you have installed this script globally
+
+Below commands assume you have included this script in your $PATH
 
 **** Help
+
 #+begin_src bash
 waterforce --help
 #+end_src
 
 **** Setting fans mode
+
 #+begin_src bash
-waterforce mode <mode>
+waterforce mode <fan_mode>
 #+end_src
 
 **** Settings fans speed
+
 #+begin_src bash
 waterforce speed <fan_speed>
+#+end_src
+
+**** Temperature sync loop
+
+Sends CPU Temperature data to the AIO in a loop
+#+begin_src bash
+waterforce sync
+#+end_src
+
+**** Temperature sync service
+
+#+begin_src bash
+waterforce install <fan_mode>
 #+end_src
 
 *** Manual
 
 **** Finding correct hwmon device
+
 #+begin_src bash
 for hwmon in /sys/class/hwmon/hwmon*; do
     echo "$hwmon: $(cat "$hwmon/name" 2>/dev/null)"
@@ -106,6 +135,7 @@ done
 *Note*: Replace *<id>* in the blocks below with the index discovered from above command (e.g. *hwmon11*)
 
 **** Setting fans mode
+
 - 0 - balance
 - 1 - custom
 - 2 - default
@@ -119,13 +149,15 @@ echo <mode> | sudo tee /sys/class/hwmon/hwmon<id>/pwm1_enable
 #+end_src
 
 **** Setting fans speed (requires custom mode)
+
 Range from 750 to 3200
 
 #+begin_src bash
 echo <fan_speed> | sudo tee /sys/class/hwmon/hwmon<id>/fan1_target
 #+end_src
 
-**** Writing CPU temperature to LCD
+**** Writing CPU temperature to the AIO
+
 #+begin_src bash
 echo <temp> | sudo tee /sys/class/hwmon/hwmon<id>/temp2_input
 #+end_src
